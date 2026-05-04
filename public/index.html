@@ -568,7 +568,8 @@ function clearSession() { try { localStorage.removeItem(SK); } catch{} }
 
 // ── WEBSOCKET ────────────────────────────────────────────
 function connect() {
-  try { ws = new WebSocket(`ws://${location.host}`); } catch { setTimeout(connect, 2000); return; }
+  try { const protocol = location.protocol === "https:" ? "wss" : "ws";
+ws = new WebSocket(`${protocol}://${location.host}`); } catch { setTimeout(connect, 2000); return; }
   ws.onopen = () => {
     setDot(true);
     const s = loadSession();
