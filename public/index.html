@@ -2013,7 +2013,8 @@
         reconnectDone = false;
         justReconnected = false;
         try {
-          ws = new WebSocket(`ws://${location.host}`);
+          const wsProto = location.protocol === "https:" ? "wss:" : "ws:";
+          ws = new WebSocket(`${wsProto}//${location.host}`);
         } catch {
           setTimeout(connect, 2000);
           return;
