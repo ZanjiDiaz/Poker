@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Poker ng mga Kalabaw</title>
+<title>SEVENS</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -300,14 +300,36 @@ body::after {
   font-size:18px; padding:8px 12px; cursor:pointer; touch-action:manipulation;
 }
 
+/* ════ ABILITY SECTION (separate from hand) ════ */
+.ability-section {
+  flex-shrink: 0;
+  background: rgba(60,0,80,.4);
+  border-top: 2px solid var(--neon);
+  padding: 6px 10px 8px;
+  position: relative; z-index: 5;
+  display: none;  /* shown only in ability mode */
+}
+.ability-section.show { display: block; }
+.ability-sec-hdr {
+  font-size:6px; color:var(--neon); letter-spacing:3px;
+  text-shadow:0 0 5px var(--neon); margin-bottom:6px;
+}
+.ability-scroll {
+  display:flex; gap:7px;
+  overflow-x:auto; -webkit-overflow-scrolling:touch;
+  scrollbar-width:none; padding:2px 2px 4px;
+}
+.ability-scroll::-webkit-scrollbar { display:none; }
+
 /* ════ HAND AREA ════ */
 .hand-area {
   flex-shrink: 0;
   background: rgba(0,0,0,.55);
   border-top: 2px solid var(--neon);
-  padding: 8px 10px;
+  padding: 8px 10px 0;
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 10px);
   position: relative; z-index: 5;
+  overflow: visible;   /* don't clip card hover-lift */
 }
 .hand-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
 .hand-ttl { font-size:7px; color:var(--neon); text-shadow:0 0 5px var(--neon); letter-spacing:2px; }
@@ -317,11 +339,11 @@ body::after {
 .h-scroll {
   display: flex; gap: 7px;
   overflow-x: auto;
-  padding: 4px 2px 8px;
+  overflow-y: visible;
+  padding: 8px 4px 14px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  min-height: 108px;
-  flex-wrap: wrap;
+  flex-shrink: 0;
 }
 .h-scroll::-webkit-scrollbar { display: none; }
 
@@ -380,6 +402,54 @@ body::after {
 }
 .card.new { animation: cardIn .25s cubic-bezier(0.34,1.56,0.64,1) both; }
 
+/* ════ CARD FULLSCREEN PREVIEW ════ */
+#card-preview-overlay {
+  display:none;
+  position:fixed; inset:0; z-index:600;
+  background:rgba(0,0,0,.88);
+  align-items:center; justify-content:center;
+  flex-direction:column; gap:20px;
+  padding:24px;
+}
+#card-preview-overlay.show { display:flex; }
+
+.preview-card {
+  width:140px; height:200px;
+  border-radius:0;
+  background:var(--cf);
+  border:3px solid #c0a060;
+  box-shadow: 6px 6px 0 rgba(0,0,0,.8), 0 0 0 3px var(--yel), 0 0 30px rgba(255,230,0,.3);
+  position:relative;
+  display:flex; flex-direction:column; align-items:stretch; padding:8px;
+  animation:previewIn .25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes previewIn {
+  from{transform:scale(.4) rotate(8deg);opacity:0;}
+  to{transform:scale(1) rotate(0);opacity:1;}
+}
+.preview-card.red   { color:var(--red); }
+.preview-card.black { color:#1a1030; }
+.preview-card .pc-tl { display:flex; flex-direction:column; align-items:center; line-height:1; }
+.preview-card .pc-br { display:flex; flex-direction:column; align-items:center; line-height:1; transform:rotate(180deg); align-self:flex-end; }
+.preview-card .pc-rank { font-family:'Press Start 2P',monospace; font-size:18px; line-height:1; }
+.preview-card .pc-suit-sm { font-size:14px; line-height:1; margin-top:2px; }
+.preview-card .pc-cs { font-size:56px; line-height:1; position:absolute; top:50%; left:50%; transform:translate(-50%,-54%); pointer-events:none; }
+.preview-card::before { content:''; position:absolute; inset:4px; border:1px solid rgba(192,160,96,.25); pointer-events:none; }
+
+.preview-hint {
+  font-family:'VT323',monospace; font-size:16px; color:var(--dim); text-align:center; letter-spacing:2px;
+}
+.preview-actions { display:flex; gap:12px; }
+.preview-btn {
+  font-family:'Press Start 2P',monospace; font-size:8px; letter-spacing:1px;
+  padding:10px 16px; border:none; cursor:pointer; outline:none; border-radius:0;
+  text-transform:uppercase; touch-action:manipulation;
+  transition:transform .06s, box-shadow .06s;
+}
+.preview-btn:active { transform:translate(2px,2px) !important; box-shadow:1px 1px 0 transparent !important; }
+.preview-btn-done { background:var(--neon); color:#1a0010; border:2px solid #aa0080; box-shadow:3px 3px 0 #aa0080; }
+.preview-btn-cancel { background:transparent; color:var(--dim); border:2px solid var(--bg3); box-shadow:3px 3px 0 rgba(0,0,0,.5); }
+
 /* ════ TOASTS ════ */
 #toasts {
   position:fixed; top:56px; left:50%; transform:translateX(-50%);
@@ -414,6 +484,253 @@ body::after {
 .win-sub { font-family:'VT323',monospace; font-size:22px; color:var(--neon); letter-spacing:2px; }
 .cf { position:fixed; pointer-events:none; animation:cff linear forwards; z-index:900; }
 @keyframes cff{0%{transform:translateY(-20px) rotate(0);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+
+/* ════ ROOM BROWSER ════ */
+.room-browser {
+  background: var(--bg);
+  border: 2px solid var(--bg3);
+  margin-bottom: 8px;
+}
+.rb-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 8px 12px; border-bottom: 2px solid var(--bg3);
+}
+.rb-refresh {
+  background:transparent; border:1px solid var(--bg3); color:var(--cyan);
+  font-size:16px; padding:2px 8px; cursor:pointer; touch-action:manipulation;
+  transition:transform .2s;
+}
+.rb-refresh.spinning { transform:rotate(180deg); }
+.rb-empty {
+  font-family:'VT323',monospace; font-size:14px; color:var(--dim);
+  text-align:center; padding:16px; letter-spacing:2px;
+}
+.room-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 10px 12px; border-bottom: 1px solid var(--bg3);
+  gap:8px; transition:background .1s;
+}
+.room-row:last-child { border-bottom:none; }
+.rr-left { display:flex; flex-direction:column; gap:3px; min-width:0; flex:1; }
+.rr-host { font-family:'VT323',monospace; font-size:16px; color:var(--whi); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rr-tags { display:flex; gap:5px; flex-wrap:wrap; }
+.rr-tag {
+  font-family:'VT323',monospace; font-size:11px; padding:1px 6px;
+  border:1px solid; letter-spacing:1px;
+}
+.rr-tag-players { color:var(--cyan); border-color:rgba(0,245,255,.3); }
+.rr-tag-ability  { color:var(--neon); border-color:rgba(255,106,193,.3); }
+.rr-tag-cards   { color:var(--yel);  border-color:rgba(255,230,0,.3); }
+.rr-join-btn {
+  flex-shrink:0; font-family:'Press Start 2P',monospace; font-size:6px;
+  padding:8px 10px; background:var(--cyan); color:#001a1a;
+  border:2px solid #006680; box-shadow:2px 2px 0 #006680;
+  cursor:pointer; touch-action:manipulation; white-space:nowrap;
+  transition:transform .06s, box-shadow .06s;
+}
+.rr-join-btn:active { transform:translate(2px,2px); box-shadow:none; }
+
+/* ════ CARD COUNT PICKER (waiting room) ════ */
+.card-count-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px; margin-top:10px;
+  background:var(--bg); border:2px solid rgba(0,245,255,.2);
+}
+.cc-label { font-size:7px; color:var(--whi); letter-spacing:1px; }
+.cc-sub { font-family:'VT323',monospace; font-size:12px; color:var(--dim); margin-top:2px; letter-spacing:1px; }
+.cc-stepper { display:flex; align-items:center; gap:8px; }
+.cc-val {
+  font-family:'Press Start 2P',monospace; font-size:16px; color:var(--yel);
+  text-shadow:0 0 8px var(--yel); min-width:24px; text-align:center;
+}
+.cc-btn {
+  width:30px; height:30px; background:var(--bg3); border:2px solid var(--bg3);
+  color:var(--cyan); font-family:'Press Start 2P',monospace; font-size:14px;
+  cursor:pointer; touch-action:manipulation; display:flex; align-items:center; justify-content:center;
+  transition:transform .06s, background .1s;
+  -webkit-appearance:none;
+}
+.cc-btn:active { transform:scale(.88); }
+.cc-btn:hover  { background:rgba(0,245,255,.12); border-color:var(--cyan); }
+
+/* ════ ABILITY MODE TOGGLE (waiting room) ════ */
+.ability-toggle-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px; margin-top:12px;
+  background:var(--bg); border:2px solid var(--bg3);
+}
+.ability-toggle-row.active { border-color:var(--neon); background:rgba(255,106,193,.06); }
+.ability-toggle-label { font-size:7px; color:var(--whi); letter-spacing:1px; }
+.ability-toggle-sub { font-family:'VT323',monospace; font-size:12px; color:var(--dim); margin-top:2px; letter-spacing:1px; }
+
+/* Toggle switch */
+.toggle-switch {
+  position:relative; width:40px; height:22px; flex-shrink:0;
+  cursor:pointer; touch-action:manipulation;
+}
+.toggle-switch input { display:none; }
+.toggle-track {
+  position:absolute; inset:0;
+  background:var(--bg3); border:2px solid var(--bg3);
+  transition:background .2s, border-color .2s;
+}
+.toggle-thumb {
+  position:absolute; top:2px; left:2px;
+  width:14px; height:14px;
+  background:var(--dim);
+  transition:transform .15s, background .15s;
+}
+.toggle-switch.on .toggle-track { background:rgba(255,106,193,.2); border-color:var(--neon); }
+.toggle-switch.on .toggle-thumb { transform:translateX(18px); background:var(--neon); box-shadow:0 0 8px var(--neon); }
+
+/* ════ ABILITY CARDS ════ */
+.card.ability-card {
+  background: linear-gradient(135deg, #1a0030 0%, #3d006e 40%, #1a0030 100%);
+  border: 2px solid var(--neon);
+  box-shadow: 3px 3px 0 rgba(0,0,0,.8), 0 0 12px rgba(255,106,193,.4);
+  color: var(--neon);
+  overflow: hidden;
+}
+.card.ability-card::before {
+  border-color: rgba(255,106,193,.3);
+}
+.card.ability-card::after {
+  content:'';
+  position:absolute; inset:0;
+  background:
+    repeating-linear-gradient(45deg, transparent 0, transparent 4px, rgba(255,106,193,.04) 4px, rgba(255,106,193,.04) 5px);
+  pointer-events:none;
+}
+
+/* Ability card charge indicator — dots fill as you tap */
+.card.ability-card .charge-dots {
+  position:absolute; bottom:5px; left:0; right:0;
+  display:flex; justify-content:center; gap:4px;
+  pointer-events:none; z-index:2;
+}
+.charge-dot {
+  width:6px; height:6px;
+  background:var(--bg3);
+  border:1px solid rgba(255,106,193,.4);
+  transition:background .15s, box-shadow .15s;
+}
+.charge-dot.lit {
+  background:var(--neon);
+  box-shadow:0 0 6px var(--neon);
+}
+
+.card.ability-card .c-ability-name {
+  position:absolute; top:50%; left:0; right:0;
+  transform:translateY(-50%);
+  text-align:center; padding:0 4px;
+  font-family:'VT323',monospace; font-size:10px; color:var(--neon);
+  text-shadow:0 0 6px var(--neon);
+  line-height:1.2; z-index:2; pointer-events:none;
+}
+
+/* Ability number badge */
+.c-ability-num {
+  font-family:'Press Start 2P',monospace; font-size:8px;
+  color: var(--neon); text-shadow:0 0 8px var(--neon);
+  line-height:1;
+}
+
+/* Charging flash animation on card */
+@keyframes chargeFlash {
+  0%   { box-shadow: 3px 3px 0 rgba(0,0,0,.8), 0 0 12px rgba(255,106,193,.4); }
+  50%  { box-shadow: 3px 3px 0 rgba(0,0,0,.8), 0 0 28px rgba(255,106,193,.9), inset 0 0 20px rgba(255,106,193,.2); }
+  100% { box-shadow: 3px 3px 0 rgba(0,0,0,.8), 0 0 12px rgba(255,106,193,.4); }
+}
+.card.ability-card.charging { animation: chargeFlash .25s ease; }
+
+/* ════ ABILITY BROADCAST OVERLAY ════ */
+#ability-overlay {
+  display:none;
+  position:fixed; inset:0; z-index:700;
+  align-items:center; justify-content:center;
+  flex-direction:column; gap:0;
+  padding:20px;
+  pointer-events:none;
+}
+#ability-overlay.show { display:flex; }
+
+/* Dim background */
+#ability-overlay::before {
+  content:'';
+  position:absolute; inset:0;
+  background:rgba(0,0,0,.82);
+  animation:aoDimIn .2s ease;
+}
+@keyframes aoDimIn { from{opacity:0;} }
+
+.ao-inner {
+  position:relative; z-index:1;
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  width:100%; max-width:340px;
+}
+
+.ao-caster {
+  font-family:'VT323',monospace; font-size:17px; color:var(--dim); letter-spacing:2px;
+  text-align:center;
+}
+.ao-caster span { color:var(--yel); }
+
+.ao-ability-name {
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(8px,3vw,11px); color:var(--neon);
+  text-shadow:0 0 12px var(--neon), 0 0 24px rgba(255,106,193,.5);
+  text-align:center; line-height:1.6; letter-spacing:1px;
+  animation:aoNameIn .35s cubic-bezier(0.34,1.56,0.64,1);
+  border:2px solid var(--neon); padding:12px 16px;
+  background:rgba(255,106,193,.06);
+  box-shadow:4px 4px 0 rgba(0,0,0,.8), 0 0 20px rgba(255,106,193,.3);
+  width:100%;
+}
+@keyframes aoNameIn { from{transform:scale(.5) rotate(-4deg);opacity:0;} }
+
+.ao-desc {
+  font-family:'VT323',monospace; font-size:14px; color:var(--whi);
+  text-align:center; letter-spacing:1px; line-height:1.4;
+}
+
+.ao-target {
+  font-family:'VT323',monospace; font-size:16px; letter-spacing:2px; text-align:center;
+}
+.ao-target .tname { color:var(--cyan); font-size:18px; }
+
+/* Reveal cards row */
+.ao-reveals {
+  display:flex; gap:8px; justify-content:center; flex-wrap:wrap;
+  animation:aoRevealIn .4s cubic-bezier(0.34,1.56,0.64,1) .15s both;
+}
+@keyframes aoRevealIn { from{transform:translateY(30px) scale(.8);opacity:0;} }
+
+.ao-reveal-item { text-align:center; }
+.ao-reveal-pname { font-family:'VT323',monospace; font-size:11px; color:var(--dim); margin-bottom:4px; }
+
+/* Mini revealed card */
+.mini-reveal-card {
+  width:46px; height:68px;
+  background:var(--cf); border:2px solid #c0a060;
+  box-shadow:3px 3px 0 rgba(0,0,0,.7);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px; position:relative; overflow:hidden;
+}
+.mini-reveal-card.red-c  { color:var(--red); }
+.mini-reveal-card.black-c { color:#1a1030; }
+.mini-reveal-card .mr-rank { font-family:'Press Start 2P',monospace; font-size:9px; }
+.mini-reveal-card .mr-suit { font-size:20px; line-height:1; }
+
+/* Ability shimmer particle burst */
+.ability-particle {
+  position:fixed; pointer-events:none; z-index:710;
+  width:6px; height:6px;
+  animation:partBurst linear forwards;
+}
+@keyframes partBurst {
+  0%   { transform:translate(0,0) scale(1); opacity:1; }
+  100% { transform:translate(var(--tx),var(--ty)) scale(0); opacity:0; }
+}
 </style>
 </head>
 <body>
@@ -421,9 +738,9 @@ body::after {
 <!-- ═════ LOBBY ═════ -->
 <div id="s-lobby" class="scr on">
   <div class="logo">
-    <div class="logo-ttl">Poker</div>
+    <div class="logo-ttl">SEVENS</div>
     <div class="logo-suits">♠ ♥ ♦ ♣</div>
-    <div class="logo-sub">— Kalabaw —</div>
+    <div class="logo-sub">— MULTIPLAYER CARD GAME —</div>
   </div>
   <div class="panel">
     <span class="lbl">▶ YOUR NAME</span>
@@ -435,12 +752,16 @@ body::after {
 
     <div class="hdiv">— OR JOIN —</div>
 
-    <span class="lbl">▶ ROOM CODE</span>
-    <input class="inp code" id="inp-code" placeholder="ENTER CODE" maxlength="5"
-           type="text" inputmode="text"
-           autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
-
-    <button class="btn btn-c" id="btn-join">→ JOIN GAME</button>
+    <!-- Room browser -->
+    <div class="room-browser">
+      <div class="rb-hdr">
+        <span class="lbl" style="margin:0;">▶ OPEN ROOMS</span>
+        <button class="rb-refresh" id="btn-refresh" title="Refresh">↺</button>
+      </div>
+      <div id="room-list-el">
+        <div class="rb-empty" id="rb-empty">NO OPEN ROOMS YET</div>
+      </div>
+    </div>
 
     <div class="conn-row">
       <span class="dot" id="ldot"></span>
@@ -473,6 +794,31 @@ body::after {
     <div style="margin-top:14px;">
       <button class="btn btn-r" id="btn-leave-wait">← BACK / LEAVE ROOM</button>
     </div>
+
+    <!-- Ability Mode toggle — only host sees controls, everyone sees status -->
+    <div class="ability-toggle-row" id="ability-toggle-row">
+      <div>
+        <div class="ability-toggle-label">⚡ ABILITY MODE</div>
+        <div class="ability-toggle-sub" id="ability-sub">ADDS SPECIAL ABILITY CARDS</div>
+      </div>
+      <div class="toggle-switch" id="ability-toggle" onclick="toggleAbilityMode()">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </div>
+    </div>
+
+    <!-- Card count picker -->
+    <div class="card-count-row" id="card-count-row">
+      <div>
+        <div class="cc-label">🃏 INITIAL CARDS</div>
+        <div class="cc-sub" id="cc-sub">PER PLAYER AT START</div>
+      </div>
+      <div class="cc-stepper">
+        <button class="cc-btn" id="cc-minus">−</button>
+        <div class="cc-val" id="cc-val">7</div>
+        <button class="cc-btn" id="cc-plus">+</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -480,7 +826,7 @@ body::after {
 <div id="s-game" class="scr">
 
   <div class="g-hdr">
-    <div class="g-ttl">Poker</div>
+    <div class="g-ttl">SEVENS</div>
     <div class="g-right">
       <span class="dot on" id="gdot"></span>
       <span class="pill">🂠 <span id="dleft">52</span></span>
@@ -526,19 +872,46 @@ body::after {
     </div>
   </div>
 
+  <!-- Ability cards — separate section, only in ability mode -->
+  <div class="ability-section" id="ability-section">
+    <div class="ability-sec-hdr">⚡ ABILITY CARDS — TAP 3× TO ACTIVATE</div>
+    <div class="ability-scroll" id="ability-scroll"></div>
+  </div>
+
   <!-- Your hand -->
   <div class="hand-area">
     <div class="hand-hdr">
       <div class="hand-ttl" id="hand-ttl">YOUR HAND</div>
       <div class="hand-cnt" id="hand-cnt">0A · 0D</div>
     </div>
-    <div class="hand-hint">TAP CARD = DONE &nbsp;·&nbsp; TAP AGAIN = UNDO</div>
+    <div class="hand-hint">TAP = PREVIEW &nbsp;·&nbsp; TAP DONE CARD = UNDO</div>
     <div class="h-scroll" id="h-scroll"></div>
+  </div>
+</div>
+
+<!-- Card fullscreen preview overlay -->
+<div id="card-preview-overlay">
+  <div id="preview-card-el" class="preview-card"></div>
+  <div class="preview-hint">TAP MARK DONE TO CONFIRM</div>
+  <div class="preview-actions">
+    <button class="preview-btn preview-btn-done" id="preview-done-btn">✓ MARK DONE</button>
+    <button class="preview-btn preview-btn-cancel" id="preview-cancel-btn">✕ CANCEL</button>
   </div>
 </div>
 
 <!-- Toasts -->
 <div id="toasts"></div>
+
+<!-- Ability overlay — broadcasts to all players when ability fires -->
+<div id="ability-overlay">
+  <div class="ao-inner">
+    <div class="ao-caster"><span id="ao-caster-name">???</span> USED AN ABILITY!</div>
+    <div class="ao-ability-name" id="ao-ability-name">???</div>
+    <div class="ao-desc" id="ao-desc"></div>
+    <div class="ao-target" id="ao-target"></div>
+    <div class="ao-reveals" id="ao-reveals"></div>
+  </div>
+</div>
 
 <!-- Win overlay -->
 <div id="win-ov">
@@ -552,7 +925,9 @@ body::after {
 const SK = 'sevens_v4';
 let ws = null, myId = null, roomCode = null, gameState = null;
 let chatOpen = false, unread = 0;
-const cardEls = new Map();  // cardId → DOM element
+let justReconnected = false;   // guard: prevent 'connected' from clobbering reconnected identity
+const cardEls = new Map();    // cardId → DOM element
+const cardCharge = new Map(); // cardId → { count, timer } for triple-tap
 
 // ── SESSION ──────────────────────────────────────────────
 function saveSession(id, code) {
@@ -568,15 +943,27 @@ function loadSession() {
 function clearSession() { try { localStorage.removeItem(SK); } catch{} }
 
 // ── WEBSOCKET ────────────────────────────────────────────
+let intentionalClose = false;
+let reconnectDone = false; // true once we successfully reconnected this session
+
 function connect() {
-  try { const protocol = location.protocol === "https:" ? "wss" : "ws";
-ws = new WebSocket(`${protocol}://${location.host}`); } catch { setTimeout(connect, 2000); return; }
+  intentionalClose = false;
+  reconnectDone = false;
+  justReconnected = false;
+  try { ws = new WebSocket(`ws://${location.host}`); } catch { setTimeout(connect, 2000); return; }
   ws.onopen = () => {
     setDot(true);
     const s = loadSession();
-    if (s) send({ type: 'reconnect', savedPlayerId: s.id, savedRoomCode: s.code });
+    if (s) {
+      justReconnected = true;
+      send({ type: 'reconnect', savedPlayerId: s.id, savedRoomCode: s.code });
+    }
   };
-  ws.onclose = () => { setDot(false); setTimeout(connect, 2000); };
+  ws.onclose = () => {
+    setDot(false);
+    reconnectDone = false;
+    if (!intentionalClose) setTimeout(connect, 2000);
+  };
   ws.onerror = () => {};
   ws.onmessage = (e) => { try { handle(JSON.parse(e.data)); } catch(err) { console.error(err); } };
 }
@@ -591,36 +978,63 @@ function setDot(on) {
 function handle(msg) {
   switch (msg.type) {
     case 'connected':
-      myId = msg.playerId; break;
+      // Guard: if we successfully reconnected this socket session, ignore any
+      // late 'connected' messages (e.g. timer firing after reconnect)
+      if (!justReconnected && !reconnectDone) {
+        myId = msg.playerId;
+      }
+      break;
     case 'reconnect_failed':
-      clearSession(); go('s-lobby'); break;
+      justReconnected = false;
+      reconnectDone = false;
+      myId = null; clearSession(); go('s-lobby'); break;
     case 'reconnected':
-      myId = msg.playerId; roomCode = msg.state.code;
+      justReconnected = false;
+      reconnectDone = true;  // lock: ignore any subsequent 'connected' on this socket
+      myId = msg.playerId;
+      roomCode = msg.state.code;
       saveSession(myId, roomCode);
-      if (msg.gameStarted) { go('s-game'); renderGame(msg.state); showChat(); sysMsg('Reconnected!'); }
-      else { go('s-wait'); renderWaiting(msg.state); }
+      if (msg.gameStarted) {
+        cardEls.clear(); cardCharge.clear(); abilityEls.clear();
+        document.getElementById('h-scroll').innerHTML = '';
+        document.getElementById('ability-scroll').innerHTML = '';
+        go('s-game'); renderGame(msg.state); showChat(); sysMsg('Reconnected!');
+      } else { go('s-wait'); renderWaiting(msg.state); }
       break;
     case 'room_created':
     case 'room_joined':
-      myId = msg.playerId; roomCode = msg.code;
+      roomCode = msg.code;
       saveSession(myId, roomCode);
       document.getElementById('disp-code').textContent = msg.code;
       go('s-wait'); renderWaiting(msg.state); break;
     case 'error':
       toast(msg.message, 'err'); break;
     case 'game_started':
+      cardEls.clear(); cardCharge.clear(); abilityEls.clear();
+      document.getElementById('h-scroll').innerHTML = '';
+      document.getElementById('ability-scroll').innerHTML = '';
       go('s-game'); renderGame(msg.state); showChat();
-      sysMsg('Game on! Tap a card to mark DONE. Tap again to undo.'); break;
+      sysMsg('Game on! Tap a card to preview. Tap MARK DONE to mark it.'); break;
     case 'state_update':
+      // Only render to whichever screen is currently active
       if (cur() === 's-game') renderGame(msg.state);
-      else renderWaiting(msg.state);
+      else if (cur() === 's-wait') renderWaiting(msg.state);
       break;
     case 'player_won':
-      renderGame(msg.state); showWin(msg.winnerName, msg.isYou); break;
+      // Stay on game screen — do NOT go to waiting
+      if (msg.state) renderGame(msg.state);
+      showWin(msg.winnerName, msg.isYou); break;
     case 'sys':
       sysMsg(msg.text); break;
     case 'chat':
       addChat(msg.name, msg.text, msg.fromId === myId); break;
+    case 'ability_used':
+      if (msg.state) renderGame(msg.state);
+      showAbilityOverlay(msg);
+      break;
+    case 'room_list':
+      renderRoomList(msg.rooms);
+      break;
   }
 }
 
@@ -634,21 +1048,84 @@ function cur() { const el = document.querySelector('.scr.on'); return el ? el.id
 // ── LOBBY ────────────────────────────────────────────────
 function getName() { return (document.getElementById('inp-name').value.trim() || 'PLAYER').substring(0,18); }
 
-document.getElementById('btn-host').addEventListener('click', () => send({ type:'create_room', name:getName() }));
-document.getElementById('btn-join').addEventListener('click', doJoin);
-document.getElementById('inp-code').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
-document.getElementById('inp-code').addEventListener('keydown', e => { if (e.key==='Enter') doJoin(); });
-document.getElementById('inp-name').addEventListener('keydown', e => { if (e.key==='Enter') send({type:'create_room',name:getName()}); });
+document.getElementById('btn-host').addEventListener('click', () => {
+  const name = getName();
+  if (!name || name === 'PLAYER') {
+    // Briefly flash the name input
+    document.getElementById('inp-name').focus();
+  }
+  send({ type:'create_room', name });
+});
+
+document.getElementById('btn-refresh').addEventListener('click', () => {
+  const btn = document.getElementById('btn-refresh');
+  btn.classList.add('spinning');
+  send({ type:'get_rooms' });
+  setTimeout(() => btn.classList.remove('spinning'), 300);
+});
+
+document.getElementById('inp-name').addEventListener('keydown', e => {
+  if (e.key==='Enter') send({type:'create_room', name:getName()});
+});
+
+function renderRoomList(roomArr) {
+  const el = document.getElementById('room-list-el');
+  const empty = document.getElementById('rb-empty');
+
+  // Remove existing rows (but keep empty msg)
+  el.querySelectorAll('.room-row').forEach(r => r.remove());
+
+  if (!roomArr || roomArr.length === 0) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  for (const room of roomArr) {
+    const row = document.createElement('div');
+    row.className = 'room-row';
+    row.innerHTML =
+      `<div class="rr-left">` +
+        `<div class="rr-host">⚡ ${esc(room.hostName)}'S ROOM</div>` +
+        `<div class="rr-tags">` +
+          `<span class="rr-tag rr-tag-players">${room.playerCount}/${room.maxPlayers} PLAYERS</span>` +
+          `<span class="rr-tag rr-tag-cards">${room.initialCards} CARDS</span>` +
+          (room.abilityMode ? `<span class="rr-tag rr-tag-ability">⚡ ABILITY</span>` : '') +
+        `</div>` +
+      `</div>` +
+      `<button class="rr-join-btn">JOIN</button>`;
+
+    row.querySelector('.rr-join-btn').addEventListener('click', () => {
+      send({ type:'join_room', name:getName(), code:room.code });
+    });
+    el.appendChild(row);
+  }
+}
 
 function doJoin() {
-  const code = document.getElementById('inp-code').value.trim().toUpperCase();
-  if (!code) { toast('ENTER A ROOM CODE', 'err'); return; }
+  // kept for backwards compat but no longer called from UI
+  const code = '';
+  if (!code) return;
   send({ type:'join_room', name:getName(), code });
 }
 
 // ── WAITING ──────────────────────────────────────────────
 document.getElementById('btn-start').addEventListener('click', () => send({type:'start_game'}));
 document.getElementById('btn-leave-wait').addEventListener('click', doLeave);
+
+function toggleAbilityMode() {
+  send({ type: 'toggle_ability_mode' });
+}
+
+// Card count stepper
+document.getElementById('cc-minus').addEventListener('click', () => {
+  const cur = parseInt(document.getElementById('cc-val').textContent) || 7;
+  if (cur > 1) send({ type:'set_initial_cards', count: cur - 1 });
+});
+document.getElementById('cc-plus').addEventListener('click', () => {
+  const cur = parseInt(document.getElementById('cc-val').textContent) || 7;
+  if (cur < 10) send({ type:'set_initial_cards', count: cur + 1 });
+});
 
 function renderWaiting(state) {
   document.getElementById('disp-code').textContent = state.code;
@@ -668,20 +1145,48 @@ function renderWaiting(state) {
   const isHost = state.hostId === myId;
   document.getElementById('host-area').style.display = isHost ? 'block' : 'none';
   document.getElementById('guest-msg').style.display  = isHost ? 'none'  : 'block';
+
+  // Ability mode toggle
+  const on = state.abilityMode || false;
+  const toggleEl = document.getElementById('ability-toggle');
+  const rowEl    = document.getElementById('ability-toggle-row');
+  const subEl    = document.getElementById('ability-sub');
+  toggleEl.classList.toggle('on', on);
+  rowEl.classList.toggle('active', on);
+  subEl.textContent = on ? '⚡ ON — SPECIAL CARDS INCLUDED' : 'ADDS SPECIAL ABILITY CARDS';
+  toggleEl.style.opacity = isHost ? '1' : '0.4';
+  toggleEl.style.pointerEvents = isHost ? 'auto' : 'none';
+
+  // Card count picker — everyone sees the value, only host can change
+  const n = state.initialCards || 7;
+  document.getElementById('cc-val').textContent = n;
+  document.getElementById('cc-minus').style.opacity = isHost && n > 1  ? '1' : '0.3';
+  document.getElementById('cc-plus').style.opacity  = isHost && n < 10 ? '1' : '0.3';
+  document.getElementById('cc-minus').style.pointerEvents = isHost ? 'auto' : 'none';
+  document.getElementById('cc-plus').style.pointerEvents  = isHost ? 'auto' : 'none';
 }
 
 // ── LEAVE ────────────────────────────────────────────────
 function doLeave() {
+  intentionalClose = true;
   clearSession();
-  cardEls.clear();
-  roomCode = null; gameState = null;
+  cardEls.clear(); cardCharge.clear(); abilityEls.clear();
+  myId = null; roomCode = null; gameState = null;
+  reconnectDone = false; justReconnected = false;
   document.getElementById('h-scroll').innerHTML = '';
+  document.getElementById('ability-scroll').innerHTML = '';
   document.getElementById('chat-msgs').innerHTML = '';
   document.getElementById('chat-bar').classList.remove('show');
   document.getElementById('chat-body').classList.remove('open');
+  document.getElementById('ability-section').classList.remove('show');
   chatOpen = false;
   go('s-lobby');
-  if (ws) { ws.close(); }
+  if (ws) ws.close();
+  // Reconnect fresh, then get room list
+  setTimeout(() => {
+    connect();
+    setTimeout(() => send({ type:'get_rooms' }), 400);
+  }, 150);
 }
 
 // ── GAME RENDER ──────────────────────────────────────────
@@ -700,7 +1205,7 @@ function renderGame(state) {
     de.innerHTML = `<span>EMPTY</span>`;
   }
 
-  // Opponents — show only total card count, all face-down pips
+  // Opponents — total card count only (no active/done split, no ability info)
   const strip = document.getElementById('opp-strip');
   strip.innerHTML = '';
   for (const p of state.players) {
@@ -717,7 +1222,7 @@ function renderGame(state) {
     strip.appendChild(b);
   }
 
-  // Your hand
+  // Your cards
   const me = state.players.find(p => p.isYou);
   if (me) {
     const a = (me.hand||[]).length;
@@ -725,24 +1230,65 @@ function renderGame(state) {
     document.getElementById('hand-ttl').textContent = esc(me.name).toUpperCase();
     document.getElementById('hand-cnt').textContent = `${a}A · ${d}D`;
     syncHand(me.hand||[], me.doneCards||[]);
+    syncAbilityCards(me.abilityCards||[], state.abilityMode);
   }
 }
 
-// ── SYNC HAND ────────────────────────────────────────────
+// ── CARD SORT ORDER ───────────────────────────────────────
+const RANK_ORDER = {'K':0,'Q':1,'J':2,'10':3,'9':4,'8':5,'7':6,'6':7,'5':8,'4':9,'3':10,'2':11,'A':12};
+function sortCards(cards) {
+  return [...cards].sort((a,b) => (RANK_ORDER[a.value]??99) - (RANK_ORDER[b.value]??99));
+}
+
+// ── CARD PREVIEW MODAL ────────────────────────────────────
+let previewCardId = null;
+const suits = {S:'♠', H:'♥', D:'♦', C:'♣'};
+
+function openCardPreview(cardId, cardData) {
+  previewCardId = cardId;
+  const ov = document.getElementById('card-preview-overlay');
+  const el = document.getElementById('preview-card-el');
+  const isRed = cardData.suit==='H' || cardData.suit==='D';
+  const sc = suits[cardData.suit] || cardData.suit;
+  el.className = `preview-card ${isRed?'red':'black'}`;
+  el.innerHTML =
+    `<div class="pc-tl"><div class="pc-rank">${cardData.value}</div><div class="pc-suit-sm">${sc}</div></div>` +
+    `<div class="pc-cs">${sc}</div>` +
+    `<div class="pc-br"><div class="pc-rank">${cardData.value}</div><div class="pc-suit-sm">${sc}</div></div>`;
+  ov.classList.add('show');
+}
+
+function closeCardPreview() {
+  previewCardId = null;
+  document.getElementById('card-preview-overlay').classList.remove('show');
+}
+
+document.getElementById('preview-done-btn').addEventListener('click', () => {
+  if (previewCardId) {
+    doToggleDone(previewCardId);
+    closeCardPreview();
+  }
+});
+document.getElementById('preview-cancel-btn').addEventListener('click', closeCardPreview);
+// Tap backdrop to cancel
+document.getElementById('card-preview-overlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('card-preview-overlay')) closeCardPreview();
+});
+
+// ── SYNC HAND (regular cards only, sorted) ───────────────
 function syncHand(hand, done) {
   const scroll = document.getElementById('h-scroll');
-  const all = [
-    ...hand.map(c => ({...c, isDone:false})),
-    ...done.map(c => ({...c, isDone:true})),
-  ];
+
+  // Sort both groups independently: active K→A, done K→A
+  const sortedHand = sortCards(hand).map(c => ({...c, isDone:false}));
+  const sortedDone = sortCards(done).map(c => ({...c, isDone:true}));
+  const all = [...sortedHand, ...sortedDone];
+
   const wantedIds = new Set(all.map(c => c.id));
 
-  // Remove cards no longer in hand
   for (const [id, el] of cardEls) {
     if (!wantedIds.has(id)) { el.remove(); cardEls.delete(id); }
   }
-
-  const suits = {S:'♠', H:'♥', D:'♦', C:'♣'};
 
   for (const card of all) {
     const isRed = card.suit==='H' || card.suit==='D';
@@ -751,6 +1297,8 @@ function syncHand(hand, done) {
 
     if (!el) {
       el = document.createElement('div');
+      el.dataset.suit = card.suit;
+      el.dataset.value = card.value;
       el.className = `card ${isRed?'red':'black'} new`;
       el.innerHTML =
         `<div class="c-tl"><div class="c-rank">${card.value}</div><div class="c-suit-sm">${sc}</div></div>` +
@@ -758,42 +1306,125 @@ function syncHand(hand, done) {
         `<div class="c-br"><div class="c-rank">${card.value}</div><div class="c-suit-sm">${sc}</div></div>` +
         `<div class="c-done-lbl">DONE</div>`;
 
-      // ─ Mobile touch handling (no 300ms delay) ─
-      let sx = 0, sy = 0, moved = false;
-      el.addEventListener('touchstart', (e) => {
-        sx = e.touches[0].clientX;
-        sy = e.touches[0].clientY;
-        moved = false;
-        el.classList.add('pressing');
-      }, {passive:true});
-      el.addEventListener('touchmove', (e) => {
-        if (Math.abs(e.touches[0].clientX-sx) > 8 || Math.abs(e.touches[0].clientY-sy) > 8) {
-          moved = true;
-          el.classList.remove('pressing');
-        }
-      }, {passive:true});
-      el.addEventListener('touchend', (e) => {
-        el.classList.remove('pressing');
-        if (!moved) {
-          e.preventDefault(); // stop ghost click
+      // First tap → preview fullscreen. If already done → toggle back directly.
+      const handleCardTap = () => {
+        const isDoneNow = el.classList.contains('done');
+        if (isDoneNow) {
+          // Undo done — no preview needed
           doToggleDone(card.id);
+        } else {
+          // Show fullscreen preview first
+          openCardPreview(card.id, { suit: el.dataset.suit, value: el.dataset.value });
         }
-      }, {passive:false});
-      // Desktop
-      el.addEventListener('click', () => doToggleDone(card.id));
+      };
 
-      setTimeout(() => el.classList.remove('new'), 300);
+      let sx=0,sy=0,moved=false;
+      el.addEventListener('touchstart',(e)=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;moved=false;el.classList.add('pressing');},{passive:true});
+      el.addEventListener('touchmove', (e)=>{if(Math.abs(e.touches[0].clientX-sx)>8||Math.abs(e.touches[0].clientY-sy)>8){moved=true;el.classList.remove('pressing');}},{passive:true});
+      el.addEventListener('touchend',  (e)=>{el.classList.remove('pressing');if(!moved){e.preventDefault();handleCardTap();}},{passive:false});
+      el.addEventListener('click', handleCardTap);
+
+      setTimeout(()=>el.classList.remove('new'),300);
       cardEls.set(card.id, el);
-      scroll.appendChild(el);
     }
-
     el.classList.toggle('done', card.isDone);
   }
 
-  // Re-order DOM: active first, done last
+  // Re-order DOM to match sorted order (active first, done last, each group K→A)
   for (const card of all) {
-    const el = cardEls.get(card.id);
-    if (el) scroll.appendChild(el);
+    const el = cardEls.get(card.id); if (el) scroll.appendChild(el);
+  }
+}
+
+// ── SYNC ABILITY CARDS (separate section) ────────────────
+const abilityEls = new Map(); // cardId → DOM element for ability cards
+
+function syncAbilityCards(abilityCards, abilityMode) {
+  const section = document.getElementById('ability-section');
+  const scroll  = document.getElementById('ability-scroll');
+
+  if (!abilityMode) { section.classList.remove('show'); return; }
+  section.classList.add('show');
+
+  const wantedIds = new Set(abilityCards.map(c => c.id));
+
+  // Remove globally-consumed ability cards
+  for (const [id, el] of abilityEls) {
+    if (!wantedIds.has(id)) { el.remove(); abilityEls.delete(id); cardCharge.delete(id); }
+  }
+
+  for (const card of abilityCards) {
+    if (abilityEls.has(card.id)) continue; // already rendered
+
+    const el = document.createElement('div');
+    el.className = 'card ability-card new';
+    // Shows ??? — revealed only on 2nd tap
+    el.innerHTML =
+      `<div class="c-tl"><div class="c-ability-num">${card.value}</div></div>` +
+      `<div class="c-ability-name" id="aname-${card.id}">???</div>` +
+      `<div class="c-br"><div class="c-ability-num">${card.value}</div></div>` +
+      `<div class="charge-dots">` +
+        `<div class="charge-dot" id="cd-${card.id}-0"></div>` +
+        `<div class="charge-dot" id="cd-${card.id}-1"></div>` +
+        `<div class="charge-dot" id="cd-${card.id}-2"></div>` +
+      `</div>`;
+
+    cardCharge.set(card.id, { count: 0, timer: null });
+
+    const abilityShortNames = ['LISTEN,\nLOOK &\nLEARN', 'KADEMO-\nNYOHAN\nNG KAMAY'];
+
+    const handleAbilityTap = () => {
+      const ch = cardCharge.get(card.id);
+      if (!ch) return;
+      if (ch.timer) clearTimeout(ch.timer);
+      ch.count++;
+
+      // Light dots
+      for (let i=0;i<3;i++) {
+        const dot = document.getElementById(`cd-${card.id}-${i}`);
+        if (dot) dot.classList.toggle('lit', i < ch.count);
+      }
+
+      // On 2nd tap — reveal the ability name
+      if (ch.count === 2) {
+        const nameEl = document.getElementById(`aname-${card.id}`);
+        if (nameEl) {
+          nameEl.textContent = abilityShortNames[card.abilityIdx] || '???';
+          nameEl.style.color = 'var(--yel)';
+          nameEl.style.textShadow = '0 0 8px var(--yel)';
+          nameEl.style.fontSize = '8px';
+        }
+      }
+
+      // Flash
+      el.classList.add('charging');
+      setTimeout(()=>el.classList.remove('charging'),300);
+
+      if (ch.count >= 3) {
+        cardCharge.delete(card.id);
+        send({ type: 'use_ability', cardId: card.id, abilityIdx: card.abilityIdx });
+      } else {
+        ch.timer = setTimeout(() => {
+          ch.count = 0;
+          for (let i=0;i<3;i++) {
+            const dot = document.getElementById(`cd-${card.id}-${i}`);
+            if (dot) dot.classList.remove('lit');
+          }
+          const nameEl = document.getElementById(`aname-${card.id}`);
+          if (nameEl) { nameEl.textContent='???'; nameEl.style.color=''; nameEl.style.textShadow=''; nameEl.style.fontSize=''; }
+        }, 2000);
+      }
+    };
+
+    let sx=0,sy=0,moved=false;
+    el.addEventListener('touchstart',(e)=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;moved=false;el.classList.add('pressing');},{passive:true});
+    el.addEventListener('touchmove', (e)=>{if(Math.abs(e.touches[0].clientX-sx)>8||Math.abs(e.touches[0].clientY-sy)>8){moved=true;el.classList.remove('pressing');}},{passive:true});
+    el.addEventListener('touchend',  (e)=>{el.classList.remove('pressing');if(!moved){e.preventDefault();handleAbilityTap();}},{passive:false});
+    el.addEventListener('click', handleAbilityTap);
+
+    setTimeout(()=>el.classList.remove('new'),300);
+    abilityEls.set(card.id, el);
+    scroll.appendChild(el);
   }
 }
 
@@ -810,6 +1441,93 @@ document.getElementById('btn-win').addEventListener('click', () => {
   send({type:'declare_win'});
 });
 document.getElementById('btn-exit').addEventListener('click', doLeave);
+
+// ── ABILITY OVERLAY ──────────────────────────────────────
+const ABILITY_DEFS = [
+  { name: 'LISTEN, LOOK AND LEARN',                             desc: 'Reveals 1 card from each opponent for 3 seconds' },
+  { name: 'KADEMONYOHAN NG KAMAY', desc: 'A random card from your hand was given to a random opponent' },
+];
+
+function showAbilityOverlay(msg) {
+  const ov = document.getElementById('ability-overlay');
+  const suits = {S:'♠', H:'♥', D:'♦', C:'♣'};
+
+  document.getElementById('ao-caster-name').textContent = msg.casterName;
+
+  const def = ABILITY_DEFS[msg.abilityIdx] || { name: 'ABILITY', desc: '' };
+  document.getElementById('ao-ability-name').textContent = def.name;
+  document.getElementById('ao-desc').textContent = def.desc;
+
+  const targetEl  = document.getElementById('ao-target');
+  const revealsEl = document.getElementById('ao-reveals');
+  targetEl.innerHTML  = '';
+  revealsEl.innerHTML = '';
+
+  if (msg.abilityIdx === 0) {
+    if (msg.reveals && msg.reveals.length > 0) {
+      // Caster sees the actual cards
+      targetEl.innerHTML = `<span style="color:var(--dim)">REVEALED FROM:</span>`;
+      for (const r of msg.reveals) {
+        const isRed = r.card.suit==='H' || r.card.suit==='D';
+        const sc = suits[r.card.suit] || r.card.suit;
+        const item = document.createElement('div');
+        item.className = 'ao-reveal-item';
+        item.innerHTML =
+          `<div class="ao-reveal-pname">${esc(r.playerName)}</div>` +
+          `<div class="mini-reveal-card ${isRed?'red-c':'black-c'}">` +
+            `<div class="mr-rank">${r.card.value}</div>` +
+            `<div class="mr-suit">${sc}</div>` +
+          `</div>`;
+        revealsEl.appendChild(item);
+      }
+    } else {
+      // Non-casters just see who used it
+      targetEl.innerHTML = `<span style="color:var(--dim)">PEEKED AT YOUR CARDS...</span>`;
+    }
+  } else if (msg.abilityIdx === 1 && msg.targetName) {
+    const suitMap = {S:'♠', H:'♥', D:'♦', C:'♣'};
+    let cardHtml = '';
+    if (msg.givenCard) {
+      const gc = msg.givenCard;
+      const isRed = gc.suit==='H' || gc.suit==='D';
+      const sc = suitMap[gc.suit] || gc.suit;
+      cardHtml = `
+        <div class="ao-reveals" style="margin-top:4px;">
+          <div class="ao-reveal-item">
+            <div class="ao-reveal-pname">CARD GIVEN</div>
+            <div class="mini-reveal-card ${isRed?'red-c':'black-c'}">
+              <div class="mr-rank">${gc.value}</div>
+              <div class="mr-suit">${sc}</div>
+            </div>
+          </div>
+        </div>`;
+    }
+    targetEl.innerHTML =
+      `<span style="color:var(--dim)">FROM <span style="color:var(--yel)">${esc(msg.casterName)}</span> → TO <span style="color:var(--cyan)">${esc(msg.targetName)}</span></span>${cardHtml}`;
+  }
+
+  ov.classList.add('show');
+  spawnAbilityParticles();
+
+  const dur = msg.abilityIdx === 0 && msg.reveals ? 4000 : 3000;
+  setTimeout(() => ov.classList.remove('show'), dur);
+}
+
+function spawnAbilityParticles() {
+  const cols = ['#ff6ac1','#00f5ff','#ffe600','#fff'];
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  for (let i = 0; i < 20; i++) {
+    const el = document.createElement('div');
+    el.className = 'ability-particle';
+    const angle = (i / 20) * Math.PI * 2;
+    const dist  = 60 + Math.random() * 120;
+    const tx = Math.cos(angle) * dist;
+    const ty = Math.sin(angle) * dist;
+    el.style.cssText = `left:${cx}px;top:${cy}px;background:${cols[~~(Math.random()*cols.length)]};--tx:${tx}px;--ty:${ty}px;animation-duration:${0.5+Math.random()*.4}s;`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  }
+}
 
 // ── WIN ──────────────────────────────────────────────────
 function showWin(name, isMe) {
